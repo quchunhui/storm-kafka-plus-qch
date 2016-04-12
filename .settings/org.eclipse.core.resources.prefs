@@ -3,4 +3,3 @@ encoding//src/main/java/com/dscn/helloworld/WordCountTopology.java=UTF-8
 encoding//src/main/java/com/dscn/helloworld/bolt/PrintBolt.java=UTF-8
 encoding//src/main/java/com/dscn/helloworld/bolt/WordCountBolt.java=UTF-8
 encoding//src/main/java/com/dscn/helloworld/bolt/WordNormalizerBolt.java=UTF-8
-encoding//src/main/java/com/dscn/helloworld/spout/RandomSentenceSpout.java=UTF-8

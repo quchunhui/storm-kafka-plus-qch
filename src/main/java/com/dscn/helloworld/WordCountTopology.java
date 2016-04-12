@@ -44,8 +44,6 @@ public class WordCountTopology {
             config.setMaxTaskParallelism(1);
             LocalCluster cluster = new LocalCluster();
             cluster.submitTopology("WordCountTopology", config, builder.createTopology());
-	        Thread.sleep(60000);
-	        cluster.shutdown();
         }
 
     	System.out.println("WordCountTopology main end!");
