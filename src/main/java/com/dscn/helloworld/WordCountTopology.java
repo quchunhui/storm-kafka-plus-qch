@@ -36,6 +36,7 @@ public class WordCountTopology {
 	        try {
 	            config.setNumWorkers(1);
 	            StormSubmitter.submitTopology("WordCountTopology", config, builder.createTopology());
+	        	System.out.println("WordCountTopology submitTopology end.");
 	        } catch (Exception e) {
 	            e.printStackTrace();
 	        }
@@ -44,6 +45,7 @@ public class WordCountTopology {
             config.setMaxTaskParallelism(1);
             LocalCluster cluster = new LocalCluster();
             cluster.submitTopology("WordCountTopology", config, builder.createTopology());
+        	System.out.println("WordCountTopology submitTopology end.");
         }
 
     	System.out.println("WordCountTopology main end!");

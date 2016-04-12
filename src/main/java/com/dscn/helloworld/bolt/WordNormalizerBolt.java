@@ -12,7 +12,6 @@ import java.util.Map;
 
 @SuppressWarnings("serial")
 public class WordNormalizerBolt extends BaseRichBolt {
-
     private OutputCollector _collector;
 
     @SuppressWarnings("rawtypes")
@@ -23,14 +22,9 @@ public class WordNormalizerBolt extends BaseRichBolt {
 
     public void execute(Tuple input) {
     	System.out.println("WordNormalizerBolt execute.");
-
         String sentence = input.getString(0);
-        String[] words = sentence.split(" ");
-
-        for (String word : words) {
-            _collector.emit(new Values(word));
-        	System.out.println("WordNormalizerBolt emit.");
-        }
+        _collector.emit(new Values(sentence));
+    	System.out.println("WordNormalizerBolt emit.");
         _collector.ack(input);
     	System.out.println("WordNormalizerBolt ack.");
     }

@@ -8,20 +8,16 @@ import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Tuple;
 import backtype.storm.tuple.Values;
 
-import java.util.HashMap;
 import java.util.Map;
 
 @SuppressWarnings("serial")
 public class WordCountBolt extends BaseRichBolt {
-
-    Map<String, Integer> counters;
     private OutputCollector outputCollector;
 
     @SuppressWarnings("rawtypes")
     public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
     	System.out.println("WordCountBolt prepare.");
         outputCollector = collector;
-        counters = new HashMap<String, Integer>();
     }
 
     public void execute(Tuple input) {
