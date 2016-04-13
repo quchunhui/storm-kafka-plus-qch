@@ -9,11 +9,12 @@ import backtype.storm.tuple.Tuple;
 @SuppressWarnings("serial")
 public class PrintBolt extends BaseBasicBolt {
     public void execute(Tuple input, BasicOutputCollector collector) {
-    	System.out.println("PrintBolt execute.");
+        String sentence = input.getString(0);
+    	System.out.println("PrintBolt sentence=" + sentence);
     }
 
     public void declareOutputFields(OutputFieldsDeclarer declarer) {
-    	System.out.println("PrintBolt declareOutputFields.");
+    	System.out.println("PrintBolt declareOutputFields. [timestamp]=" + System.currentTimeMillis());
         declarer.declare(new Fields("word"));
     }
 }

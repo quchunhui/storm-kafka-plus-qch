@@ -21,9 +21,8 @@ public class WordNormalizerBolt extends BaseRichBolt {
     }
 
     public void execute(Tuple input) {
-    	System.out.println("WordNormalizerBolt execute.");
+    	System.out.println("WordNormalizerBolt execute. [timestamp]=" + System.currentTimeMillis());
         String sentence = input.getString(0);
-    	System.out.println("WordNormalizerBolt sentence=" + sentence);
         _collector.emit(new Values(sentence));
     	System.out.println("WordNormalizerBolt emit.");
         _collector.ack(input);

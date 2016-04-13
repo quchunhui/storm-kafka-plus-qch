@@ -12,19 +12,21 @@ import java.util.Map;
 
 @SuppressWarnings("serial")
 public class WordCountBolt extends BaseRichBolt {
-    private OutputCollector outputCollector;
+    private OutputCollector _collector;
 
     @SuppressWarnings("rawtypes")
     public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
     	System.out.println("WordCountBolt prepare.");
-        outputCollector = collector;
+    	_collector = collector;
     }
 
     public void execute(Tuple input) {
-    	System.out.println("WordCountBolt execute.");
+    	System.out.println("WordCountBolt execute. [timestamp]=" + System.currentTimeMillis());
         String str = input.getString(0);
-        outputCollector.emit(new Values(str));
+        _collector.emit(new Values(str));
     	System.out.println("WordCountBolt emit.");
+        _collector.ack(input);
+    	System.out.println("WordCountBolt ack.");
     }
 
     public void cleanup() {
