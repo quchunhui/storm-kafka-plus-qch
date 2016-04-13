@@ -23,13 +23,13 @@ public class WordCountTopology {
     public static void main(String[] args) throws InterruptedException {
     	System.out.println("WordCountTopology main start!");
 
-		//BrokerHosts brokerHosts = new ZkHosts("192.168.93.128:2181,192.168.93.129:2181,192.168.93.130:2181");
-		BrokerHosts brokerHosts = new ZkHosts("192.168.93.128:2181");
+		BrokerHosts brokerHosts = new ZkHosts("192.168.93.128:2181,192.168.93.129:2181,192.168.93.130:2181");
+		//BrokerHosts brokerHosts = new ZkHosts("192.168.93.128:2181");
 		SpoutConfig spoutConfig = new SpoutConfig(brokerHosts, "qchlocaltest", "", "topo");
 		spoutConfig.scheme = new SchemeAsMultiScheme(new StringScheme());
 		spoutConfig.forceFromStart = true;
-		//spoutConfig.zkServers = Arrays.asList(new String[] {"192.168.93.128", "192.168.93.129", "192.168.93.130"});
-		spoutConfig.zkServers = Arrays.asList(new String[] {"192.168.93.128"});
+		spoutConfig.zkServers = Arrays.asList(new String[] {"192.168.93.128", "192.168.93.129", "192.168.93.130"});
+		//spoutConfig.zkServers = Arrays.asList(new String[] {"192.168.93.128"});
 		spoutConfig.zkPort = 2181;
 
 	    TopologyBuilder builder = new TopologyBuilder();
@@ -42,8 +42,12 @@ public class WordCountTopology {
         config.setDebug(false);
 
         if (args != null && args.length > 0) {
-        	System.out.println("WordCountTopology not local.");
-	        try {
+        	System.out.println("WordCountTopology not local. ");
+        	for (int i = 0; i < args.length; i++) {
+            	System.out.println("WordCountTopology args[" + i + "]=" + args[i]);
+        	}
+
+        	try {
 	            config.setNumWorkers(1);
 	            StormSubmitter.submitTopology("WordCountTopology", config, builder.createTopology());
 	        	System.out.println("WordCountTopology submitTopology end.");
