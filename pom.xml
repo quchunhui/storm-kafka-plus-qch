@@ -19,12 +19,13 @@
         </dependency>
         <dependency>
             <groupId>org.apache.storm</groupId>
-            <artifactId>storm-kafka</artifactId>
+            <artifactId>storm-core</artifactId>
             <version>0.9.5</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.storm</groupId>
-            <artifactId>storm-core</artifactId>
+            <artifactId>storm-kafka</artifactId>
             <version>0.9.5</version>
         </dependency>
         <dependency>
