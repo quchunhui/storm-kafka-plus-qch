@@ -15,6 +15,8 @@ import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Row;
 import org.json.JSONObject;
 
+import com.dscn.helloworld.common.Constants;
+
 import backtype.storm.task.OutputCollector;
 import backtype.storm.task.TopologyContext;
 import backtype.storm.topology.OutputFieldsDeclarer;
@@ -28,8 +30,11 @@ public class SurfBolt extends BaseRichBolt {
 	private OutputCollector _collector;
 	private HashMap<String, String> map = new HashMap<String, String>();
 
+	long startTime = System.currentTimeMillis();
+    long count = 0;
+
     public SurfBolt() {
-		_conf.set("hbase.zookeeper.quorum", "192.168.1.36,192.168.1.37,192.168.1.38");
+		_conf.set("hbase.zookeeper.quorum", Constants.hostList);
 		try {
 			_hTable = new HTable(_conf, "test");
 		} catch (IOException e) {
@@ -39,16 +44,22 @@ public class SurfBolt extends BaseRichBolt {
 
     @SuppressWarnings("rawtypes")
 	public void prepare(Map sconf, TopologyContext context, OutputCollector collector) {
-    	System.out.println("SurfBolt prepare.");
     	_collector = collector;
     }
 
 	@SuppressWarnings("rawtypes")
 	public void execute(Tuple tuple) {
+    	System.out.println("SurfBolt sentence=" + tuple.getString(0));
 		String jsonObject = tuple.getStringByField("JsonMsg");
 		JSONObject jsonArray = new JSONObject(jsonObject);
 
-		try {
+    	count++;
+        if (count % 20000 == 0) {
+        	long sumTime = System.currentTimeMillis();
+        	System.out.println("[RESULT]the time of 20000 is [" + (sumTime - startTime) + "]");
+        }
+
+        try {
 			String row_key = jsonArray.get("logisticProviderID").toString() + ":" + jsonArray.get("mailNo").toString();
 			map.put("mailType", jsonArray.get("mailType").toString());				// 面单类型
 			map.put("weight", jsonArray.get("weight").toString());					// 重量

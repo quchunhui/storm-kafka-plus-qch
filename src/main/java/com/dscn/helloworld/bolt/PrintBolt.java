@@ -14,7 +14,6 @@ public class PrintBolt extends BaseBasicBolt {
     }
 
     public void declareOutputFields(OutputFieldsDeclarer declarer) {
-    	System.out.println("PrintBolt declareOutputFields. [timestamp]=" + System.currentTimeMillis());
         declarer.declare(new Fields("word"));
     }
 }

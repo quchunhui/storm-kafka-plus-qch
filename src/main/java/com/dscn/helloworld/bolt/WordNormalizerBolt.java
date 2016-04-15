@@ -13,28 +13,31 @@ import java.util.Map;
 @SuppressWarnings("serial")
 public class WordNormalizerBolt extends BaseRichBolt {
     private OutputCollector _collector;
+    long startTime = System.currentTimeMillis();
+    long count = 0;
 
     @SuppressWarnings("rawtypes")
     public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
-    	System.out.println("WordNormalizerBolt prepare.");
         _collector = collector;
     }
 
     public void execute(Tuple input) {
-    	System.out.println("WordNormalizerBolt execute. [timestamp]=" + System.currentTimeMillis());
-        String sentence = input.getString(0);
+
+    	count++;
+        if (count % 200000 == 0) {
+        	long sumTime = System.currentTimeMillis();
+        	System.out.println("[RESULT]the time of 20000 is [" + (sumTime - startTime) + "]");
+        }
+
+    	String sentence = input.getString(0);
         _collector.emit(new Values(sentence));
-    	System.out.println("WordNormalizerBolt emit.");
         _collector.ack(input);
-    	System.out.println("WordNormalizerBolt ack.");
     }
 
     public void cleanup() {
-    	System.out.println("WordNormalizerBolt cleanup.");
     }
 
     public void declareOutputFields(OutputFieldsDeclarer declarer) {
-    	System.out.println("WordNormalizerBolt declareOutputFields.");
         declarer.declare(new Fields("word"));
     }
 }
