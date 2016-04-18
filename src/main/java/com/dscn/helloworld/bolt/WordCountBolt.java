@@ -20,8 +20,8 @@ public class WordCountBolt extends BaseRichBolt {
     }
 
     public void execute(Tuple input) {
-        String str = input.getString(0);
-        _collector.emit(new Values(str));
+        String msg = input.getString(0);
+        _collector.emit(new Values(msg));
         _collector.ack(input);
     }
 

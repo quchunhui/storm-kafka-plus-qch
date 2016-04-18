@@ -16,6 +16,7 @@ import com.dscn.helloworld.utilities.CommonUtil;
 import backtype.storm.Config;
 import backtype.storm.LocalCluster;
 import backtype.storm.StormSubmitter;
+import backtype.storm.metric.LoggingMetricsConsumer;
 import backtype.storm.topology.TopologyBuilder;
 import backtype.storm.tuple.Fields;
 import backtype.storm.spout.SchemeAsMultiScheme;
@@ -54,37 +55,27 @@ public class WordCountTopology {
 
 	    TopologyBuilder builder = new TopologyBuilder();
         builder.setSpout("RandomSentence", new KafkaSpout(spoutConfig), 1).setNumTasks(1);
-        if (args != null && args.length > 0) {
-        	System.out.println("WordCountTopology Linux!");
-            builder.setBolt("SurfBolt", new SurfBolt(), 1).shuffleGrouping("RandomSentence").setNumTasks(1);
-        } else {
-        	System.out.println("WordCountTopology VMware!");
-            builder.setBolt("WordNormalizer", new WordNormalizerBolt(), 1).shuffleGrouping("RandomSentence").setNumTasks(1);
-            builder.setBolt("WordCount", new WordCountBolt(), 1).fieldsGrouping("WordNormalizer", new Fields("word")).setNumTasks(1);
-            builder.setBolt("Print", new PrintBolt(), 1).shuffleGrouping("WordCount").setNumTasks(1);
-        }
+        builder.setBolt("SurfBolt", new SurfBolt(), 1).shuffleGrouping("RandomSentence").setNumTasks(1);
+//        builder.setBolt("WordNormalizer", new WordNormalizerBolt(), 1).shuffleGrouping("RandomSentence").setNumTasks(1);
+//        builder.setBolt("WordCount", new WordCountBolt(), 1).fieldsGrouping("WordNormalizer", new Fields("word")).setNumTasks(1);
+//        builder.setBolt("Print", new PrintBolt(), 1).shuffleGrouping("WordCount").setNumTasks(1);
 
         Config config = new Config();
         config.setDebug(false);
 
         if (args != null && args.length > 0) {
-        	System.out.println("WordCountTopology Linux");
-
-        	config.put(Config.NIMBUS_HOST, args[0]);
             config.setNumWorkers(1);
-
+        	config.put(Config.NIMBUS_HOST, args[0]);
         	try {
 	            StormSubmitter.submitTopology("WordCountTopology", config, builder.createTopology());
-	        	System.out.println("WordCountTopology submitTopology end.");
+	        	System.out.println("submitTopology success!");
 	        } catch (Exception e) {
 	            e.printStackTrace();
 	        }
         } else {
-        	System.out.println("WordCountTopology VMware.");
             config.setMaxTaskParallelism(1);
             LocalCluster cluster = new LocalCluster();
             cluster.submitTopology("WordCountTopology", config, builder.createTopology());
-        	System.out.println("WordCountTopology submitTopology end.");
         }
 
     	System.out.println("WordCountTopology main end!");

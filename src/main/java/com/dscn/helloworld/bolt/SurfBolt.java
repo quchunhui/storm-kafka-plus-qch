@@ -23,7 +23,7 @@ import backtype.storm.topology.OutputFieldsDeclarer;
 import backtype.storm.topology.base.BaseRichBolt;
 import backtype.storm.tuple.Tuple;
 
-@SuppressWarnings({ "deprecation", "serial" })
+@SuppressWarnings({ "serial" })
 public class SurfBolt extends BaseRichBolt {
 	private static Configuration _conf = HBaseConfiguration.create();
 	private static HTable _hTable = null;
@@ -32,9 +32,10 @@ public class SurfBolt extends BaseRichBolt {
 
 	long startTime = System.currentTimeMillis();
     long count = 0;
+    int sumCount = 0;
 
     public SurfBolt() {
-		_conf.set("hbase.zookeeper.quorum", Constants.hostList);
+		_conf.set("hbase.zookeeper.quorum", Constants.hbaseHostList);
 		try {
 			_hTable = new HTable(_conf, "test");
 		} catch (IOException e) {
@@ -49,43 +50,48 @@ public class SurfBolt extends BaseRichBolt {
 
 	@SuppressWarnings("rawtypes")
 	public void execute(Tuple tuple) {
-    	System.out.println("SurfBolt sentence=" + tuple.getString(0));
-		String jsonObject = tuple.getStringByField("JsonMsg");
-		JSONObject jsonArray = new JSONObject(jsonObject);
-
+		if (count == 0) {
+	    	System.out.println("SurfBolt run success. first msg=[" + tuple.getString(0) + "]");
+		}
     	count++;
-        if (count % 20000 == 0) {
-        	long sumTime = System.currentTimeMillis();
-        	System.out.println("[RESULT]the time of 20000 is [" + (sumTime - startTime) + "]");
-        }
+    	this.consoleLog();
+
+		if (!tuple.contains("JsonMsg")) {
+			_collector.ack(tuple);
+			return ;
+		}
+		
+		String jsonObject = tuple.getStringByField("JsonMsg");
+		System.out.println(">>>>>>>jsonObject=" + jsonObject);
+		JSONObject jsonArray = new JSONObject(jsonObject);
 
         try {
 			String row_key = jsonArray.get("logisticProviderID").toString() + ":" + jsonArray.get("mailNo").toString();
-			map.put("mailType", jsonArray.get("mailType").toString());				// 面单类型
-			map.put("weight", jsonArray.get("weight").toString());					// 重量
-			map.put("senAreaCode", jsonArray.get("senAreaCode").toString());		// 寄件国家代码
-			map.put("recAreaCode", jsonArray.get("recAreaCode").toString());		// 收件国家代码
-			map.put("senCityCode", jsonArray.get("senCityCode").toString());		// 寄件城市代码
-			map.put("recCityCode", jsonArray.get("recCityCode").toString());		// 收件城市代码
-			map.put("senProv", jsonArray.get("senProvCode").toString());			// 寄件城市代码
-			map.put("senCity", jsonArray.get("senCity").toString());				// 收件城市代码
-			map.put("senCountyCode", jsonArray.get("senCountyCode").toString());	// 寄件国家代码
-			map.put("senAddress", jsonArray.get("senAddress").toString());			// 收件国家代码
-			map.put("senName", jsonArray.get("senName").toString());				// 寄件人姓名
-			map.put("senMobile", jsonArray.get("senMobile").toString());			// 寄件人移动电话
-			map.put("senPhone", jsonArray.get("senPhone").toString());				// 寄件人固定电话
-			map.put("recProvCode", jsonArray.get("recProvCode").toString());		// 收件人姓名
-			map.put("recCity", jsonArray.get("recCity").toString());				// 收件人移动电话
-			map.put("recCountyCode", jsonArray.get("recCountyCode").toString());	// 收件人固定电话
-			map.put("recAddress", jsonArray.get("recAddress").toString());			// 收件地址省份
-			map.put("recName", jsonArray.get("recName").toString());				// 收件地址城市
-			map.put("recMobile", jsonArray.get("recMobile").toString());			// 收件地址区县
-			map.put("recPhone", jsonArray.get("recPhone").toString());				// 收件详细地址
-			map.put("typeOfContents", jsonArray.get("typeOfContents").toString());	// 内件类型
-			map.put("nameOfCoutents", jsonArray.get("nameOfCoutents").toString());	// 内件品名
-			map.put("mailCode", jsonArray.get("mailCode").toString());				// 产品代码
-			map.put("recDatetime", jsonArray.get("recDatetime").toString());		// 寄件日期
-			map.put("insuranceValue", jsonArray.get("insuranceValue").toString());	// 保价金额
+			map.put("mailType", jsonArray.get("mailType").toString());
+			map.put("weight", jsonArray.get("weight").toString());
+			map.put("senAreaCode", jsonArray.get("senAreaCode").toString());
+			map.put("recAreaCode", jsonArray.get("recAreaCode").toString());
+			map.put("senCityCode", jsonArray.get("senCityCode").toString());
+			map.put("recCityCode", jsonArray.get("recCityCode").toString());
+			map.put("senProv", jsonArray.get("senProvCode").toString());
+			map.put("senCity", jsonArray.get("senCity").toString());
+			map.put("senCountyCode", jsonArray.get("senCountyCode").toString());
+			map.put("senAddress", jsonArray.get("senAddress").toString());
+			map.put("senName", jsonArray.get("senName").toString());
+			map.put("senMobile", jsonArray.get("senMobile").toString());
+			map.put("senPhone", jsonArray.get("senPhone").toString());
+			map.put("recProvCode", jsonArray.get("recProvCode").toString());
+			map.put("recCity", jsonArray.get("recCity").toString());
+			map.put("recCountyCode", jsonArray.get("recCountyCode").toString());
+			map.put("recAddress", jsonArray.get("recAddress").toString());
+			map.put("recName", jsonArray.get("recName").toString());
+			map.put("recMobile", jsonArray.get("recMobile").toString());
+			map.put("recPhone", jsonArray.get("recPhone").toString());
+			map.put("typeOfContents", jsonArray.get("typeOfContents").toString());
+			map.put("nameOfCoutents", jsonArray.get("nameOfCoutents").toString());
+			map.put("mailCode", jsonArray.get("mailCode").toString());
+			map.put("recDatetime", jsonArray.get("recDatetime").toString());
+			map.put("insuranceValue", jsonArray.get("insuranceValue").toString());
 
 			Put put = new Put(row_key.getBytes());
 			Set set = map.entrySet();
@@ -120,5 +126,12 @@ public class SurfBolt extends BaseRichBolt {
 
 	@SuppressWarnings("rawtypes")
 	public void prepare(Map arg0, TopologyContext arg1) {
+	}
+
+	private void consoleLog() {
+        if ((count % Constants.sumCount) == 0) {
+        	long sumTime = System.currentTimeMillis();
+        	System.out.println("[RESULT]count=[" + count + "], time=[" + (sumTime - startTime) + "]");
+        }
 	}
 }
