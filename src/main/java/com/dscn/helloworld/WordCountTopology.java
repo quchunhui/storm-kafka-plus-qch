@@ -55,8 +55,8 @@ public class WordCountTopology {
 
 	    TopologyBuilder builder = new TopologyBuilder();
         builder.setSpout("RandomSentence", new KafkaSpout(spoutConfig), 1).setNumTasks(1);
-        builder.setBolt("SurfBolt", new SurfBolt(), 1).shuffleGrouping("RandomSentence").setNumTasks(1);
-//        builder.setBolt("WordNormalizer", new WordNormalizerBolt(), 1).shuffleGrouping("RandomSentence").setNumTasks(1);
+        builder.setBolt("WordNormalizer", new WordNormalizerBolt(), 1).shuffleGrouping("RandomSentence").setNumTasks(1);
+        builder.setBolt("SurfBolt", new SurfBolt(), 1).shuffleGrouping("WordNormalizer").setNumTasks(1);
 //        builder.setBolt("WordCount", new WordCountBolt(), 1).fieldsGrouping("WordNormalizer", new Fields("word")).setNumTasks(1);
 //        builder.setBolt("Print", new PrintBolt(), 1).shuffleGrouping("WordCount").setNumTasks(1);
 

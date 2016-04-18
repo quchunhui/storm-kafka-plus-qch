@@ -13,6 +13,7 @@ import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Row;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.dscn.helloworld.common.Constants;
@@ -21,6 +22,7 @@ import backtype.storm.task.OutputCollector;
 import backtype.storm.task.TopologyContext;
 import backtype.storm.topology.OutputFieldsDeclarer;
 import backtype.storm.topology.base.BaseRichBolt;
+import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Tuple;
 
 @SuppressWarnings({ "serial" })
@@ -29,18 +31,19 @@ public class SurfBolt extends BaseRichBolt {
 	private static HTable _hTable = null;
 	private OutputCollector _collector;
 	private HashMap<String, String> map = new HashMap<String, String>();
+	private List<Row> _bath = new ArrayList<Row>();
 
 	long startTime = System.currentTimeMillis();
     long count = 0;
     int sumCount = 0;
 
     public SurfBolt() {
-		_conf.set("hbase.zookeeper.quorum", Constants.hbaseHostList);
-		try {
-			_hTable = new HTable(_conf, "test");
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+//		_conf.set("hbase.zookeeper.quorum", Constants.hbaseHostList);
+//		try {
+//			_hTable = new HTable(_conf, "test");
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
     }
 
     @SuppressWarnings("rawtypes")
@@ -60,10 +63,15 @@ public class SurfBolt extends BaseRichBolt {
 			_collector.ack(tuple);
 			return ;
 		}
-		
+
 		String jsonObject = tuple.getStringByField("JsonMsg");
-		System.out.println(">>>>>>>jsonObject=" + jsonObject);
-		JSONObject jsonArray = new JSONObject(jsonObject);
+		
+		JSONObject jsonArray = null;
+		try {
+			jsonArray = new JSONObject(jsonObject);
+		} catch (JSONException e) {
+			return ;
+		}
 
         try {
 			String row_key = jsonArray.get("logisticProviderID").toString() + ":" + jsonArray.get("mailNo").toString();
@@ -102,16 +110,15 @@ public class SurfBolt extends BaseRichBolt {
 				put.add("info".getBytes(), ((String)mapentry.getKey()).getBytes(), ((String)mapentry.getValue()).getBytes());
 			}
 
-			List<Row> bath = new ArrayList<Row>();
-			bath.add(put);
-			if (bath.size() == 1000) {
-				Object[] reluts = new Object[bath.size()];
+			_bath.add(put);
+			if (_bath.size() == Constants.putCount) {
+				Object[] reluts = new Object[_bath.size()];
 				try {
-					_hTable.batch(bath, reluts);
+					_hTable.batch(_bath, reluts);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
-				bath.clear();
+				_bath.clear();
 			}
 			map.clear();
 		} catch (IOException e) {
@@ -121,7 +128,7 @@ public class SurfBolt extends BaseRichBolt {
 		_collector.ack(tuple);
     }
 
-	public void declareOutputFields(OutputFieldsDeclarer arg0) {
+	public void declareOutputFields(OutputFieldsDeclarer declarer) {
 	}
 
 	@SuppressWarnings("rawtypes")

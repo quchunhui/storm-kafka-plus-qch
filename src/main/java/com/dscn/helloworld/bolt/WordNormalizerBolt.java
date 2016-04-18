@@ -29,6 +29,6 @@ public class WordNormalizerBolt extends BaseRichBolt {
     }
 
     public void declareOutputFields(OutputFieldsDeclarer declarer) {
-        declarer.declare(new Fields("word"));
+        declarer.declare(new Fields("JsonMsg"));
     }
 }
