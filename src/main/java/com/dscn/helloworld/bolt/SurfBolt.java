@@ -22,7 +22,6 @@ import backtype.storm.task.OutputCollector;
 import backtype.storm.task.TopologyContext;
 import backtype.storm.topology.OutputFieldsDeclarer;
 import backtype.storm.topology.base.BaseRichBolt;
-import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Tuple;
 
 @SuppressWarnings({ "serial" })
@@ -38,12 +37,12 @@ public class SurfBolt extends BaseRichBolt {
     int sumCount = 0;
 
     public SurfBolt() {
-//		_conf.set("hbase.zookeeper.quorum", Constants.hbaseHostList);
-//		try {
-//			_hTable = new HTable(_conf, "test");
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		}
+		_conf.set("hbase.zookeeper.quorum", Constants.hbaseHostList);
+		try {
+			_hTable = new HTable(_conf, "test");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
     }
 
     @SuppressWarnings("rawtypes")
