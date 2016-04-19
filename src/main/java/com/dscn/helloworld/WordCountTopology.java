@@ -6,8 +6,8 @@ import storm.kafka.SpoutConfig;
 import storm.kafka.ZkHosts;
 import storm.kafka.StringScheme;
 
-import com.dscn.helloworld.bolt.PrintBolt;
 import com.dscn.helloworld.bolt.SurfBolt;
+import com.dscn.helloworld.bolt.PrintBolt;
 import com.dscn.helloworld.bolt.WordCountBolt;
 import com.dscn.helloworld.bolt.WordNormalizerBolt;
 import com.dscn.helloworld.common.Constants;
@@ -16,9 +16,7 @@ import com.dscn.helloworld.utilities.CommonUtil;
 import backtype.storm.Config;
 import backtype.storm.LocalCluster;
 import backtype.storm.StormSubmitter;
-import backtype.storm.metric.LoggingMetricsConsumer;
 import backtype.storm.topology.TopologyBuilder;
-import backtype.storm.tuple.Fields;
 import backtype.storm.spout.SchemeAsMultiScheme;
 
 /**
@@ -42,6 +40,7 @@ import backtype.storm.spout.SchemeAsMultiScheme;
  * 默认和executor1:1
  * 
  */
+@SuppressWarnings("unused")
 public class WordCountTopology {
     public static void main(String[] args) throws InterruptedException {
     	System.out.println("WordCountTopology main start!");
@@ -55,8 +54,8 @@ public class WordCountTopology {
 
 	    TopologyBuilder builder = new TopologyBuilder();
         builder.setSpout("RandomSentence", new KafkaSpout(spoutConfig), 1).setNumTasks(1);
-        builder.setBolt("WordNormalizer", new WordNormalizerBolt(), 1).shuffleGrouping("RandomSentence").setNumTasks(1);
-        builder.setBolt("SurfBolt", new SurfBolt(), 1).shuffleGrouping("WordNormalizer").setNumTasks(1);
+        builder.setBolt("SurfBolt", new SurfBolt(), 20).shuffleGrouping("RandomSentence");
+//        builder.setBolt("WordNormalizer", new WordNormalizerBolt(), 1).shuffleGrouping("RandomSentence").setNumTasks(1);
 //        builder.setBolt("WordCount", new WordCountBolt(), 1).fieldsGrouping("WordNormalizer", new Fields("word")).setNumTasks(1);
 //        builder.setBolt("Print", new PrintBolt(), 1).shuffleGrouping("WordCount").setNumTasks(1);
 

@@ -28,7 +28,6 @@ import backtype.storm.tuple.Tuple;
 public class SurfBolt extends BaseRichBolt {
 	private static Configuration _conf = HBaseConfiguration.create();
 	private static HTable _hTable = null;
-	private OutputCollector _collector;
 	private HashMap<String, String> map = new HashMap<String, String>();
 	private List<Row> _bath = new ArrayList<Row>();
 
@@ -36,18 +35,17 @@ public class SurfBolt extends BaseRichBolt {
     long count = 0;
     int sumCount = 0;
 
-    public SurfBolt() {
+    static {
 		_conf.set("hbase.zookeeper.quorum", Constants.hbaseHostList);
 		try {
 			_hTable = new HTable(_conf, "test");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-    }
+	}
 
     @SuppressWarnings("rawtypes")
 	public void prepare(Map sconf, TopologyContext context, OutputCollector collector) {
-    	_collector = collector;
     }
 
 	@SuppressWarnings("rawtypes")
@@ -58,17 +56,12 @@ public class SurfBolt extends BaseRichBolt {
     	count++;
     	this.consoleLog();
 
-		if (!tuple.contains("JsonMsg")) {
-			_collector.ack(tuple);
-			return ;
-		}
-
 		String jsonObject = tuple.getStringByField("JsonMsg");
-		
 		JSONObject jsonArray = null;
 		try {
 			jsonArray = new JSONObject(jsonObject);
 		} catch (JSONException e) {
+	    	System.out.println("[ERROE]JSONException." + e.getMessage());
 			return ;
 		}
 
@@ -99,7 +92,6 @@ public class SurfBolt extends BaseRichBolt {
 			map.put("mailCode", jsonArray.get("mailCode").toString());
 			map.put("recDatetime", jsonArray.get("recDatetime").toString());
 			map.put("insuranceValue", jsonArray.get("insuranceValue").toString());
-
 			Put put = new Put(row_key.getBytes());
 			Set set = map.entrySet();
 			Iterator iterator = set.iterator();
@@ -123,8 +115,6 @@ public class SurfBolt extends BaseRichBolt {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-
-		_collector.ack(tuple);
     }
 
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
