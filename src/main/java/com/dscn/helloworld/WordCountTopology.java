@@ -53,7 +53,7 @@ public class WordCountTopology {
 		spoutConfig.zkPort = Integer.valueOf(Constants.zkPort);
 
 	    TopologyBuilder builder = new TopologyBuilder();
-        builder.setSpout("RandomSentence", new KafkaSpout(spoutConfig), 1).setNumTasks(1);
+        builder.setSpout("RandomSentence", new KafkaSpout(spoutConfig), 20);
         builder.setBolt("SurfBolt", new SurfBolt(), 20).shuffleGrouping("RandomSentence");
 //        builder.setBolt("WordNormalizer", new WordNormalizerBolt(), 1).shuffleGrouping("RandomSentence").setNumTasks(1);
 //        builder.setBolt("WordCount", new WordCountBolt(), 1).fieldsGrouping("WordNormalizer", new Fields("word")).setNumTasks(1);
@@ -63,7 +63,7 @@ public class WordCountTopology {
         config.setDebug(false);
 
         if (args != null && args.length > 0) {
-            config.setNumWorkers(1);
+            config.setNumWorkers(12);
         	config.put(Config.NIMBUS_HOST, args[0]);
         	try {
 	            StormSubmitter.submitTopology("WordCountTopology", config, builder.createTopology());

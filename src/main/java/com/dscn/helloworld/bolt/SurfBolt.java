@@ -34,6 +34,7 @@ public class SurfBolt extends BaseRichBolt {
 	long startTime = System.currentTimeMillis();
     long count = 0;
     int sumCount = 0;
+    long hbaseTime = 0;
 
     static {
 		_conf.set("hbase.zookeeper.quorum", Constants.hbaseHostList);
@@ -53,17 +54,17 @@ public class SurfBolt extends BaseRichBolt {
 		if (count == 0) {
 	    	System.out.println("SurfBolt run success. first msg=[" + tuple.getString(0) + "]");
 		}
-    	count++;
-    	this.consoleLog();
 
-		String jsonObject = tuple.getStringByField("JsonMsg");
 		JSONObject jsonArray = null;
 		try {
-			jsonArray = new JSONObject(jsonObject);
+			jsonArray = new JSONObject(tuple.getString(0));
 		} catch (JSONException e) {
 	    	System.out.println("[ERROE]JSONException." + e.getMessage());
 			return ;
 		}
+
+    	count++;
+    	this.consoleLog();
 
         try {
 			String row_key = jsonArray.get("logisticProviderID").toString() + ":" + jsonArray.get("mailNo").toString();
@@ -103,6 +104,8 @@ public class SurfBolt extends BaseRichBolt {
 
 			_bath.add(put);
 			if (_bath.size() == Constants.putCount) {
+				long hbaseStartTime = System.currentTimeMillis();
+
 				Object[] reluts = new Object[_bath.size()];
 				try {
 					_hTable.batch(_bath, reluts);
@@ -110,6 +113,9 @@ public class SurfBolt extends BaseRichBolt {
 					e.printStackTrace();
 				}
 				_bath.clear();
+
+				long hbaseEndTime = System.currentTimeMillis();
+				hbaseTime += (hbaseEndTime - hbaseStartTime);
 			}
 			map.clear();
 		} catch (IOException e) {
@@ -128,6 +134,7 @@ public class SurfBolt extends BaseRichBolt {
         if ((count % Constants.sumCount) == 0) {
         	long sumTime = System.currentTimeMillis();
         	System.out.println("[RESULT]count=[" + count + "], time=[" + (sumTime - startTime) + "]");
+        	System.out.println("[RESULT]HBase insert time. sumtime=" + hbaseTime);
         }
 	}
 }
